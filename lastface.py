@@ -6,7 +6,7 @@ import cv2
 from PIL import Image, ImageTk
 import threading
 import time
-
+import numpy as np
 
 class Surface(ttk.Frame):
     pic_path = ""
@@ -113,8 +113,27 @@ class Surface(ttk.Frame):
                 r, roi, color = self.predictor.predict(img_bgr, resize_rate)
                 if r:
                     break
-            # r, roi, color = self.predictor.predict(img_bgr, 1)
             self.show_roi(r, roi, color)
+
+    def choose_license_area(contours, Min_Area):
+        temp_contours = []
+        for contour in contours:
+            if cv2.contourArea(contour) > Min_Area:  # 面积大于MIN_AREA的区域保留
+                temp_contours.append(contour)
+        license_area = []
+        for temp_contour in temp_contours:
+            rect_tupple = cv2.minAreaRect(temp_contour)
+            # print(rect_tupple)
+            rect_width, rect_height = rect_tupple[1]  # 0为中心点，1为长和宽，2为角度
+            if rect_width < rect_height:
+                rect_width, rect_height = rect_height, rect_width
+            aspect_ratio = rect_width / rect_height
+            # 车牌正常情况下宽高比在2 - 5.5之间
+            if aspect_ratio > 2 and aspect_ratio < 5.5:
+                license_area.append(temp_contour)
+                rect_vertices = cv2.boxPoints(rect_tupple)
+                rect_vertices = np.int0(rect_vertices)
+        return license_area
 
     @staticmethod
     def vedio_thread(self):
