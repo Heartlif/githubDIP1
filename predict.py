@@ -552,7 +552,6 @@ class CardPredictor:
                     w = part_card.shape[1] // 3
                     part_card = cv2.copyMakeBorder(part_card, 0, 0, w, w, cv2.BORDER_CONSTANT, value=[0, 0, 0])
                     part_card = cv2.resize(part_card, (SZ, SZ), interpolation=cv2.INTER_AREA)
-
                     part_card = preprocess_hog([part_card])
                     if i == 0:
                         resp = self.modelchinese.predict(part_card)
